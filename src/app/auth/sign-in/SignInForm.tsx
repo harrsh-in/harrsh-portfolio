@@ -3,6 +3,8 @@
 import { ChangeEvent, FormEvent, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
+import { useMutation } from '@tanstack/react-query';
+import { toast } from 'react-toastify';
 
 const SignInForm = ({ csrfToken }: SignInFormProps) => {
     const router = useRouter();
@@ -10,6 +12,35 @@ const SignInForm = ({ csrfToken }: SignInFormProps) => {
     const [formValues, setFormValues] = useState({
         username: '',
         password: '',
+    });
+
+    const { mutate, isPending } = useMutation({
+        mutationKey: ['signIn', formValues],
+        mutationFn: () =>
+            signIn('credentials', {
+                redirect: false,
+                username: formValues.username,
+                password: formValues.password,
+            }),
+        onSuccess: (data) => {
+            console.log(data);
+            if (!data) {
+                return;
+            }
+
+            if (!data.ok) {
+                toast.error(data.error);
+                return;
+            }
+
+            console.log('Signed in');
+            window.history.replaceState(null, '', '/app/dashboard');
+            router.push('/app/dashboard');
+        },
+        onError: (error) => {
+            console.error('Failed to sign in');
+            console.log(error);
+        },
     });
 
     const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
@@ -21,22 +52,12 @@ const SignInForm = ({ csrfToken }: SignInFormProps) => {
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
-        const result = await signIn('credentials', {
-            redirect: false,
-            username: formValues.username,
-            password: formValues.password,
-        });
-
-        if (result?.ok) {
-            window.history.replaceState(null, '', '/app/dashboard');
-            router.push('/app/dashboard');
-        } else {
-            console.error('Failed to sign in');
-        }
+        mutate();
     };
 
     return (
         <div>
+            {isPending ? <p>Loading...</p> : null}
             <h1>Sign In</h1>
             <form onSubmit={handleSubmit}>
                 <input

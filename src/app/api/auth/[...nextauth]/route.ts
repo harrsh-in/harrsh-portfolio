@@ -4,6 +4,7 @@
 import NextAuth, { AuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
 import axios from 'axios';
+import { get } from 'lodash';
 
 export const authOptions: AuthOptions = {
     providers: [
@@ -31,11 +32,23 @@ export const authOptions: AuthOptions = {
                     );
                     const userData = userDataResponse.data;
 
-                    if (userData) {
-                        return userData;
+                    if (!userData) {
+                        return;
                     }
+
+                    return userData;
                 } catch (error) {
                     console.error('Failed to authenticate:', error);
+
+                    let errorMessage: string = get(
+                        error,
+                        'response.data.message',
+                        '',
+                    );
+                    if (!errorMessage) {
+                        errorMessage = get(error, 'message', '');
+                    }
+                    throw new Error(errorMessage);
                 }
                 return null;
             },
