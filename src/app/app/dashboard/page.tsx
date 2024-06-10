@@ -1,5 +1,3 @@
-import ProtectedRoute from '@/components/ProtectedRoute';
-
 const DashboardPage = () => {
     return (
         <div>
@@ -9,11 +7,7 @@ const DashboardPage = () => {
 };
 
 const Dashboard = () => {
-    return (
-        <ProtectedRoute>
-            <DashboardPage />
-        </ProtectedRoute>
-    );
+    return <DashboardPage />;
 };
 
 export default Dashboard;

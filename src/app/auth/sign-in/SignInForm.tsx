@@ -28,6 +28,7 @@ const SignInForm = ({ csrfToken }: SignInFormProps) => {
         });
 
         if (result?.ok) {
+            window.history.replaceState(null, '', '/app/dashboard');
             router.push('/app/dashboard');
         } else {
             console.error('Failed to sign in');

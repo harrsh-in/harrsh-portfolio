@@ -5,13 +5,21 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { ReactNode, useEffect } from 'react';
 
-interface ProtectedRouteProps {
+interface ProtectedLayoutProps {
     children: ReactNode;
 }
 
-const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
+const ProtectedLayout = ({ children }: ProtectedLayoutProps) => {
     const { data: session, status } = useSession();
     const router = useRouter();
+
+    const handleSignOut = async () => {
+        await signOut({
+            redirect: false,
+        });
+        window.history.replaceState(null, '', '/');
+        router.push('/');
+    };
 
     useEffect(() => {
         if (status === 'loading') {
@@ -33,7 +41,7 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
                 <nav>
                     <Link href={'/app/dashboard'}>Dashboard</Link>
 
-                    <button onClick={() => signOut()}>Logout</button>
+                    <button onClick={handleSignOut}>Logout</button>
                 </nav>
             </header>
 
@@ -42,4 +50,4 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
     );
 };
 
-export default ProtectedRoute;
+export default ProtectedLayout;
